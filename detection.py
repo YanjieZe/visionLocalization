@@ -31,7 +31,8 @@ if __name__ == "__main__":
         assert cap.isOpened(), 'Cannot capture source'
         while (True):
             ret, frame = cap.read()
-            cv2.imshow('camera',frame)
+            dst = function.HarrisCornerDetection(frame)
+            cv2.imshow('camera',dst)
             if cv2.waitKey(1) & 0xFF == ord('q'): 
                 break
         cap.release()

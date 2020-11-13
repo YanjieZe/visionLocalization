@@ -13,8 +13,13 @@ def figshow(imgname,img):
 def HarrisCornerDetection(Img):
     gray = cv2.cvtColor(Img,cv2.COLOR_BGR2GRAY)
     gray = np.float32(gray)
-    blockSize=5
-    ksize=3
+    blockSize=15
+    ksize=5
     k=0.04
     dst = cv2.cornerHarris(gray,blockSize,ksize,k)
     return dst
+
+def countours(Img):
+    gray = cv2.cvtColor(Img,cv2.COLOR_BGR2GRAY)
+    dst = cv2.findContours(gray)
+    dst = cv2.drawContours(dst,color='red')
