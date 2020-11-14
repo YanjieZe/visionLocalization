@@ -13,16 +13,16 @@ def figshow(imgname,img):
 def HarrisCornerDetection(Img):
     gray = cv2.cvtColor(Img,cv2.COLOR_BGR2GRAY)
 
-    thresh = 150 # hyperparameter
+    thresh = 200 # hyperparameter
     _, threshImg = cv2.threshold(gray,thresh,255,0)
     dst, contours, _ = cv2.findContours(threshImg,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
-    
-    dst = cv2.drawContours(dst,contours, -1, (255,0,0), 3)
-    # dst = np.float32(dst)
-    # blockSize=15
-    # ksize=5
-    # k=0.04
-    # dst = cv2.cornerHarris(dst,blockSize,ksize,k)
+
+    dst = cv2.drawContours(dst,contours, -1, (0,0,255), 3)
+    dst = np.float32(dst)
+    blockSize=15
+    ksize=5
+    k=0.04
+    dst = cv2.cornerHarris(dst,blockSize,ksize,k)
 
     return dst
 
