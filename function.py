@@ -18,11 +18,11 @@ def HarrisCornerDetection(Img):
     dst, contours, _ = cv2.findContours(threshImg,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
 
     dst = cv2.drawContours(dst,contours, -1, (0,0,255), 3)
-    dst = np.float32(dst)
-    blockSize=15
-    ksize=5
-    k=0.04
-    dst = cv2.cornerHarris(dst,blockSize,ksize,k)
+    # dst = np.float32(dst)
+    # blockSize=15
+    # ksize=5
+    # k=0.04
+    # dst = cv2.cornerHarris(dst,blockSize,ksize,k)
 
     return dst
 
