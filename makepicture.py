@@ -1,6 +1,7 @@
 import cv2
 
-cap = cv2.VideoCapture("mark.mp4")
+path = 0
+cap = cv2.VideoCapture(path)
 count = 0
 while cap.isOpened():
     ret, frame = cap.read()
