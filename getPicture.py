@@ -15,7 +15,7 @@ def getPicture(num,epoch):
                 break
             
     
-if __name__="__main__":
+if __name__=="__main__":
     num=1
     epoch=1
     getPicture(num,epoch)
