@@ -10,7 +10,7 @@ from utils.function import savepicture
 做了一些改动，通过调节参数收集图像
 '''
 
-def main_loop(targetreop = 2,targetframeperRopo = 2):
+def main_loop(collectframe=0, targetreop = 1,targetframeperRopo = 1):
 	# 枚举相机
 	DevList = mvsdk.CameraEnumerateDevice()
 	nDev = len(DevList)
@@ -92,18 +92,19 @@ def main_loop(targetreop = 2,targetframeperRopo = 2):
 			cv2.imshow("Press q to end", frame)
 			# cv2.imwrite("rmset/"+str(i)+".jpg",frame)
 			# i+=1
-			savepicture(reponame=reponame,framename=framename,frame=frame)
-			framename +=1
-			if framename == targetframeperRopo:
-				framename = 0
-				reponame +=1
-			
-			if reponame>=targetreop:
-				print("Collection finished")
-				mvsdk.CameraUnInit(hCamera)
-				mvsdk.CameraAlignFree(pFrameBuffer)
-				cv2.destroyAllWindows()
-				return 0
+			if collect_frame ==1:
+				savepicture(reponame=reponame,framename=framename,frame=frame)
+				framename +=1
+				if framename == targetframeperRopo:
+					framename = 0
+					reponame +=1
+				
+				if reponame>=targetreop:
+					print("Collection finished")
+					mvsdk.CameraUnInit(hCamera)
+					mvsdk.CameraAlignFree(pFrameBuffer)
+					cv2.destroyAllWindows()
+					return 0
 
 			
 		except mvsdk.CameraException as e:
@@ -116,10 +117,10 @@ def main_loop(targetreop = 2,targetframeperRopo = 2):
 	# 释放帧缓存
 	mvsdk.CameraAlignFree(pFrameBuffer)
 
-def main():
+	
+
+if __name__=="__main__":
 	try:
 		main_loop()
 	finally:
 		cv2.destroyAllWindows()
-
-main()
