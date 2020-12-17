@@ -9,7 +9,10 @@ enter this line of code in your command line to use the wec camera mode.
 
 **12.13** finish the RMset version 1.0 and use yolov5 to get over 80% accuracy
 
+**12.17** finish the function: **connect the mindvision camera and auto collect frame as the raw dataset**
+
+
 # Bug log
-## 1."bort"
+## 1."bort" (this may appear on MacOS)
 solution: 
 > sudo code .
