@@ -5,7 +5,12 @@ import mvsdk
 import platform
 from utils.function import savepicture
 
-def main_loop():
+'''
+2020.12.17
+做了一些改动，通过调节参数收集图像
+'''
+
+def main_loop(targetreop = 2,targetframeperRopo = 2):
 	# 枚举相机
 	DevList = mvsdk.CameraEnumerateDevice()
 	nDev = len(DevList)
@@ -61,8 +66,7 @@ def main_loop():
 	'''
 	reponame = 0
 	framename = 0
-	targetreop = 2
-	targetframeperRopo = 2
+	
 
 	while (cv2.waitKey(100) & 0xFF) != ord('q'):
 		# 从相机取一帧图片
