@@ -1,7 +1,7 @@
 # CornerPointDetection
 YanjieZe(the Last Refugee)
 # Use method
-## 1
+## 1 use web cam to detection
 enter this line of code in your command line to use the wec camera mode.
 
 > python detection.py --mode webcam
