@@ -1,8 +1,13 @@
 # CornerPointDetection
-Use method：</br>
+YanjieZe(the Last Refugee)
+# Use method
+## 1
 enter this line of code in your command line to use the wec camera mode.
 
 > python detection.py --mode webcam
+
+## 2 Collect frame as the raw dataset
+> python cv_grab.py
 
 # Process Log
 **11.13** start to write some bullshit

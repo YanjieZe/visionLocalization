@@ -4,7 +4,7 @@ import numpy as np
 import mvsdk
 import platform
 from utils.function import savepicture
-
+import argparse
 '''
 2020.12.17
 做了一些改动，通过调节参数收集图像
@@ -20,7 +20,7 @@ def main_loop(collectframe=0, targetreop = 1,targetframeperRopo = 1):
 
 	for i, DevInfo in enumerate(DevList):
 		print("{}: {} {}".format(i, DevInfo.GetFriendlyName(), DevInfo.GetPortType()))
-	i = 0 if nDev == 1 else int(input("Select camera: "))
+	i = 0 if nDev == 1 else int(input("Select camera(often choose 1): "))
 	DevInfo = DevList[i]
 	print(DevInfo)
 
@@ -92,7 +92,7 @@ def main_loop(collectframe=0, targetreop = 1,targetframeperRopo = 1):
 			cv2.imshow("Press q to end", frame)
 			# cv2.imwrite("rmset/"+str(i)+".jpg",frame)
 			# i+=1
-			if collect_frame ==1:
+			if collectframe ==1:
 				savepicture(reponame=reponame,framename=framename,frame=frame)
 				framename +=1
 				if framename == targetframeperRopo:
@@ -117,10 +117,19 @@ def main_loop(collectframe=0, targetreop = 1,targetframeperRopo = 1):
 	# 释放帧缓存
 	mvsdk.CameraAlignFree(pFrameBuffer)
 
-	
+
+parser = argparse.ArgumentParser(description='collect dataset')
+parser.add_argument('--collection',dest='collection',type=int,required=True,
+					help ='choose whether to collect picture,0 is not to collect,1 is to collect')
+parser.add_argument('--reponum',dest='reponum',type=int,required=False,default=1,
+					help = 'choose how many repo you want to build up')
+parser.add_argument('--framenum',dest='framenum',type=int,required=False,default=1,
+					help = 'choose how many frame you want in each repo')
+args = parser.parse_args()
+
 
 if __name__=="__main__":
 	try:
-		main_loop()
+		main_loop(collectframe=args.collection,targetreop=args.reponum,targetframeperRopo=args.framenum)
 	finally:
 		cv2.destroyAllWindows()
