@@ -5,7 +5,7 @@ import sys
 import time
 
 import cv2
-import function
+from utils.function import savepicture
 import numpy as np
 parser = argparse.ArgumentParser(description='corner point detection')
 
@@ -31,8 +31,8 @@ if __name__ == "__main__":
         assert cap.isOpened(), 'Cannot capture source'
         while (True):
             ret, frame = cap.read()
-            dst = function.HarrisCornerDetection(frame)
-            cv2.imshow('camera',dst)
+            # dst = function.HarrisCornerDetection(frame)
+            cv2.imshow('camera',frame)
             if cv2.waitKey(1) & 0xFF == ord('q'): 
                 break
         cap.release()

@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import os
 
 def figshow(imgname,img):
     if not isinstance(imgname,str):
@@ -32,3 +33,18 @@ def countours(Img):
     dst = cv2.drawContours(dst,color='red')
 
     return dst
+
+
+
+'''
+2020.12.17 
+一个用来保存frame的函数
+'''
+def savepicture(reponame,framename,frame):
+  
+   if not os.path.exists(str(reponame)):
+        os.mkdir(str(reponame))
+   
+   savepath = str(reponame)+'/'+ str(framename)+'.jpg'
+   assert not os.path.exists(str(savepath)),'this picture has exits'
+   cv2.imwrite(savepath,frame)
