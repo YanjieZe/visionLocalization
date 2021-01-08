@@ -29,9 +29,49 @@ def findCorner(img):
     img_canny = cv2.Canny(img_blur,threshold1,threshold2)
     # retr_tree的方式检索轮廓
     _, contours, hierarchy = cv2.findContours(img_canny, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
-    
-    print(hierarchy)
-    img_final = cv2.drawContours(img, contours,-1,[0,255,0],2)
+
+
+    '''
+    备注一下：
+    hierarchy的内容： [Next, Previous, First_Child, Parent]
+    '''
+
+    '''
+    找到面积最大的三个轮廓
+    '''
+    area1 = 0
+    area2 = 0
+    area3 = 0
+    idx1 = -1
+    idx2 = -1
+    idx3 = -1
+    if len(contours)<3:
+        '''
+        这里等下要重写，改成能重新调整阈值进行匹配
+        '''
+        raise "contours not enough"
+
+    for idx,cnt in enumerate(contours):
+        area = cv2.contourArea(cnt)
+        if area > area1:
+            area3 = area2
+            idx3 = idx2
+            area2 = area1
+            idx2 = idx1
+            area1 = area
+            idx1 = idx
+        elif area > area2:
+            area3 = area2
+            idx3 = idx2
+            area2 = area
+            idx2 = idx
+        elif area > area3:
+            area3 = area
+            idx3 = idx
+        
+    for i in [idx1,idx2,idx3]:
+        img_final = cv2.drawContours(img, contours,i,[255,255,0],2)
+    print(map(cv2.contourArea,contours))
     # img_final = img_canny
     return img_final
 

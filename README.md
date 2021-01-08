@@ -28,6 +28,8 @@ new version
 **2021.01.08** start to modify the code but then decide to write **corner detection** first
 开始自己尝试写角点检测算法。第一个想法是先把他切割出来，就是用yolo分割的结果做一个切割。简单的**getCropped()**实现一下。
 第二个想法是用这个tag最明显的位置来进行角点的推算，有两个很容易检测的位置：中间的字母，右下角的一个小方块。那么我就先把轮廓提取出来，再把这两个的轮廓拿出来，求一下中心点的位置，就可以得到描述这个tag的两个特征。先把这个想法实现一下吧。得到这两个中心点的坐标后tag的四个角点坐标基本就出来了。
+
+把轮廓面积排了一下，莫名和预计中的不一样。
 # Bug log
 ## 1."bort" (this may appear on MacOS)
 solution: 
