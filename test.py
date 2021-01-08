@@ -1,3 +1,3 @@
-import cv2 
+import mvcamera
 
-assert False,'wrong'
+mvcamera.Camera()
