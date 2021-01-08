@@ -77,7 +77,7 @@ def findCorner(img):
         cy = int(M['m01']/M['m00'])
         img = cv2.circle(img,(cx,cy),1,[255,0,0],5)
         center_point = (cx,cy)
-        img = cv2.putText(img,"(%d,%d)"%(cx,cy),center_point,cv2.FONT_HERSHEY_PLAIN,1,(0,0,255))
+        img = cv2.putText(img,"(%d,%d)"%(cx,cy),center_point,cv2.FONT_HERSHEY_PLAIN,0.5,(0,0,255))
         img = cv2.drawContours(img, contours,i,[255,255,0],2)
     # 这里是找到了中心字母和字符的轮廓了，并且标了出来
 
@@ -98,15 +98,12 @@ def findCorner(img):
             cy = int(M['m01']/M['m00'])
             img = cv2.circle(img,(cx,cy),1,[255,0,0],5)
             center_point = (cx,cy)
-            img = cv2.putText(img,"(%d,%d)"%(cx,cy),center_point,cv2.FONT_HERSHEY_PLAIN,1,(0,0,255))
+            img = cv2.putText(img,"(%d,%d)"%(cx,cy),center_point,cv2.FONT_HERSHEY_PLAIN,0.5,(0,0,255))
             img = cv2.drawContours(img, contours,i,[255,255,0],2)
             
 
 
 
-
-
-    # img_final = img_canny
     return img
 
 
