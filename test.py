@@ -1,3 +1,3 @@
 import mvcamera
 
-mvcamera.Camera()
+print("(%d,%d)"%(1,2))

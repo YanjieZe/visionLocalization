@@ -68,12 +68,46 @@ def findCorner(img):
         elif area > area3:
             area3 = area
             idx3 = idx
-        
+       
     for i in [idx1,idx2,idx3]:
-        img_final = cv2.drawContours(img, contours,i,[255,255,0],2)
-    print(map(cv2.contourArea,contours))
+        #计算轮廓中心点
+        M=cv2.moments(contours[i])
+        
+        cx = int(M['m10']/M['m00'])
+        cy = int(M['m01']/M['m00'])
+        img = cv2.circle(img,(cx,cy),1,[255,0,0],5)
+        center_point = (cx,cy)
+        img = cv2.putText(img,"(%d,%d)"%(cx,cy),center_point,cv2.FONT_HERSHEY_PLAIN,1,(0,0,255))
+        img = cv2.drawContours(img, contours,i,[255,255,0],2)
+    # 这里是找到了中心字母和字符的轮廓了，并且标了出来
+
+
+    '''
+    通过几何形状逼近找出右下角小方块
+    '''
+    for i in range(len(contours)):
+        # 轮廓逼近
+        epsilon = 0.01 * cv2.arcLength(contours[i], True)
+        approx = cv2.approxPolyDP(contours[i], epsilon, True)
+        # 分析几何形状
+        corners = len(approx)
+        shape_type = ""
+        if corners == 4:
+            M=cv2.moments(contours[i])
+            cx = int(M['m10']/M['m00'])
+            cy = int(M['m01']/M['m00'])
+            img = cv2.circle(img,(cx,cy),1,[255,0,0],5)
+            center_point = (cx,cy)
+            img = cv2.putText(img,"(%d,%d)"%(cx,cy),center_point,cv2.FONT_HERSHEY_PLAIN,1,(0,0,255))
+            img = cv2.drawContours(img, contours,i,[255,255,0],2)
+            
+
+
+
+
+
     # img_final = img_canny
-    return img_final
+    return img
 
 
 if __name__=="__main__":
