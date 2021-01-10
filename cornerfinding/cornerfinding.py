@@ -1,6 +1,7 @@
 import cv2
 import mvsdk
 import mvcamera
+import numpy as np
 
 def getCropped(picture, label):
     
@@ -22,7 +23,9 @@ def getCropped(picture, label):
 
     return img_cropped
 
-
+'''
+角点检测算法
+'''
 def findCorner(img):
     img_blur = cv2.GaussianBlur(img, (3,3),0)
     threshold1 = 100
@@ -147,6 +150,30 @@ def findCorner(img):
 
     return img
 
+'''
+根据颜色提取轮廓
+'''
+def redContourExtract(img):
+    img = cv2.cvtColor(img,cv2.COLOR_BGR2HSV)
+    # range of red
+    lower_red = np.array([160, 60, 60])
+    upper_red = np.array([180, 255, 255])
+
+    lower_red2 = np.array([0, 60, 60])
+    upper_red2 = np.array([10, 255, 255])  # thers is two ranges of red
+
+    mask_r = cv2.inRange(img, lower_red, upper_red)
+
+    mask_r2 = cv2.inRange(img, lower_red2, upper_red2)
+
+    mask = mask_r + mask_r2
+    
+    kernel = np.ones((3,3))
+    img = cv2.dilate(mask,kernel)
+    img = cv2.erode(img,kernel)
+
+    return img
+
 
 def cameraLoop():
         DevList = mvsdk.CameraEnumerateDevice()
@@ -169,8 +196,11 @@ def cameraLoop():
                 frame = cam.grab()
                 if frame is not None:
                     frame = cv2.resize(frame, (640,480), interpolation = cv2.INTER_LINEAR)
-                    img = findCorner(frame)
-        
+                    '''
+                    输入frame处，在此对frame做修改
+                    '''
+                    frame = redContourExtract(frame)
+                
                     cv2.imshow("{} Press q to end".format(cam.DevInfo.GetFriendlyName()), frame)
 
         for cam in cams:
