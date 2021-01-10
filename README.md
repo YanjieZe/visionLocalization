@@ -19,7 +19,7 @@ new version
 this python file is in another folder.So you should first:
 > cd cornerfinding
 then:
-> python cornerfinding.py
+> python cornerfinding.py --mode camera
 
 # Process Log
 **2020.11.13** start to write some bullshit
@@ -59,7 +59,11 @@ then:
 
 第六个想法，通过实时获得hsv值对想要得到的区域进行标定，再进行检测，即部分自动参数设置功能。
 
-写好了一个取参数的函数**autoHSVget**
+写好了一个取参数的函数**autoHSVget**。
+
+使用**auotoHSVget**进行了参数调节，获得了正常曝光度情况下的结果，还不错！
+![](localizationV2.gif)
+
 
 # Bug log
 ## 1."bort" (this may appear on MacOS)

@@ -2,4 +2,4 @@
 Yanjie Ze
 
 # Order
-> py cornerfinding.py
+> py cornerfinding.py --mode camera

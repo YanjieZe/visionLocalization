@@ -163,11 +163,11 @@ def redContourExtract(img):
     img_origin = img.copy()
     img = cv2.cvtColor(img,cv2.COLOR_BGR2HSV)
     # range of red
-    lower_red = np.array([160, 60, 60])
-    upper_red = np.array([180, 255, 255])
+    lower_red = np.array([130, 90, 20])
+    upper_red = np.array([180, 180, 80])
 
     lower_red2 = np.array([0, 60, 60])
-    upper_red2 = np.array([10, 255, 255])  # thers is two ranges of red
+    upper_red2 = np.array([20, 250, 150])  # thers is two ranges of red
 
     mask_r = cv2.inRange(img, lower_red, upper_red)
 
@@ -238,7 +238,7 @@ def redContourExtract(img):
         img_origin = cv2.circle(img_origin,(cx,cy),1,[255,0,0],5)
         center_point = (cx,cy)
         center_point_list.append(center_point)
-        img_origin = cv2.putText(img_origin,"(%d,%d)"%(cx,cy),center_point,cv2.FONT_HERSHEY_PLAIN,2,(0,0,255))
+        img_origin = cv2.putText(img_origin,"(%d,%d)"%(cx,cy),center_point,cv2.FONT_HERSHEY_PLAIN,2,(0,255,255),2)
         img_origin = cv2.drawContours(img_origin,contours[i],-1,[255,255,0],3)
     print("Area Max 4:",area1,area2,area3,area4)
     return img_origin
@@ -286,12 +286,15 @@ def CameraLoopCornerFinding():
                 frame = cam.grab()
                 if frame is not None:
                     frame = cv2.resize(frame, (640,480), interpolation = cv2.INTER_LINEAR)
+                    
+                    
                     '''
                     输入frame处，在此对frame做修改
                     '''
-                    frame = findCorner(frame)
+                    frame = redContourExtract(frame)
                 
-                    cv2.imshow("{} Press q to end".format(cam.DevInfo.GetFriendlyName()), frame)
+                    cv2.imshow("Vision Localization V1.0".format(cam.DevInfo.GetFriendlyName()), frame)
+                    
 
         for cam in cams:
             cam.close()
@@ -307,30 +310,11 @@ if __name__=="__main__":
     mode = args.mode
 
     if mode == "img":
-        '''
-         读取label
-        '''
-        labelfile = open('36.txt','r',encoding='utf-8')
-        # label格式：class ，x_center ，y_center ，width， height
-        # 对应：      0       1            2        3       4
-        label = labelfile.readline().split(' ')
-        labelfile.close()
-        float_label = []
-        for num in  label:
-            float_label.append(float(num))
-        label = float_label
-
-        '''
-        读取picture
-        '''
-        picture = cv2.imread('36.jpg')
-
-        img = getCropped(picture, label)
-        img = findCorner(img)
-        '''
-        debug区
-        '''
-        cv2.imshow('croped', img)
+        img = cv2.imread("example2.jpg")
+        autoHSVget(img)
+        img = redContourExtract(img)
+        
+        cv2.imshow("img",img)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
 
