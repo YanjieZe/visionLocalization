@@ -58,6 +58,8 @@ def findCorner(img):
 
     for idx,cnt in enumerate(contours):
         area = cv2.contourArea(cnt)
+        if area<500:
+            continue
         if area > area1:
             area3 = area2
             idx3 = idx2
@@ -73,9 +75,12 @@ def findCorner(img):
         elif area > area3:
             area3 = area
             idx3 = idx
-       
+
+    print("Contours Area(max 3):",area1,area2,area3)  
     for i in [idx1,idx2,idx3]:
         #计算轮廓中心点
+        if i == -1:
+            continue
         M=cv2.moments(contours[i])
         if M['m00']==0:
                 M['m00']=0.001
@@ -128,6 +133,7 @@ def findCorner(img):
     elif len(center_point_list)<=0:
         return img
     else:
+        print("Square has found!,area:",cv2.contourArea(contours[square_idx]))
         M=cv2.moments(contours[square_idx])
         if M['m00']==0:
                 M['m00']=0.001
