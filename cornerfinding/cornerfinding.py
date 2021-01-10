@@ -27,6 +27,7 @@ def getCropped(picture, label):
 角点检测算法
 '''
 def findCorner(img):
+    
     img_blur = cv2.GaussianBlur(img, (3,3),0)
     threshold1 = 100
     threshold2 = 250
@@ -270,12 +271,14 @@ def cameraLoop():
             cam.close()
 
 
+
+
 if __name__=="__main__":
     mode = "camera"
 
     if mode == "img":
         '''
-        读取label
+         读取label
         '''
         labelfile = open('36.txt','r',encoding='utf-8')
         # label格式：class ，x_center ，y_center ，width， height
