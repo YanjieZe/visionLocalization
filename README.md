@@ -15,8 +15,11 @@ new version
 ## 3 Use mindVision camera,just for a look
 > python grabFrame.py --collection 0
 
-## 4 use mindVison camera for detection(haven't been finished)
-> python detect.py --weights best.pt  --source 0 --view-img
+## 4 use mindVison camera for detection
+this python file is in another folder.So you should first:
+> cd cornerfinding
+then:
+> python cornerfinding.py
 
 # Process Log
 **2020.11.13** start to write some bullshit
@@ -43,12 +46,18 @@ new version
 
 做完优化后，可以找到点，但是会有很多点在飘，接下来考虑要么使用目标跟踪的算法，要么重新优化原来的算法。
 在新的图片中我发现tag的红色十分明显，考虑从这一步入手先试一试。原先的**findCorner**可以先不改，对于轮廓提取做出改进就行。
-想法五，颜色分割+轮廓识别重调。
+第五个想法，颜色分割+轮廓识别重调。
 
 颜色分割的结果意外地好。开始进行轮廓的识别和位置的计算。
 
 面积筛选和中心点计算已完成，效果很好！详情见**redContourExtract**
 ![](localizationV1.gif)
+
+接下来就是增强鲁棒性。
+1. 原图高曝光，红色更容易识别，但是在不同场景下会失效。考虑如何提高这一方面的颜色适应性。
+2. 算法中的颜色区域可能不够精准，考虑通过实时返回的hsv值对要识别的区域进行标定。
+
+第六个想法，通过实时获得hsv值对想要得到的区域进行标定，再进行检测，即部分自动参数设置功能。
 
 # Bug log
 ## 1."bort" (this may appear on MacOS)
