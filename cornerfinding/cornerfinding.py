@@ -154,6 +154,7 @@ def findCorner(img):
 根据颜色提取轮廓
 '''
 def redContourExtract(img):
+    img_origin = img.copy()
     img = cv2.cvtColor(img,cv2.COLOR_BGR2HSV)
     # range of red
     lower_red = np.array([160, 60, 60])
@@ -171,8 +172,70 @@ def redContourExtract(img):
     kernel = np.ones((3,3))
     img = cv2.dilate(mask,kernel)
     img = cv2.erode(img,kernel)
+    # 这里已经可以得到四个角的很明显的图像。
 
-    return img
+    # 面积筛选
+    
+    _,contours,hierarchy = cv2.findContours(img,cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+
+    area1 = 0
+    area2 = 0
+    area3 = 0
+    area4 = 0
+    idx1 = -1
+    idx2 = -1
+    idx3 = -1
+    idx4 = -1
+
+    if len(contours)==0:
+        print("Currently contours num is equal to Zero!")
+        return img
+
+    for idx,cnt in enumerate(contours):
+        area = cv2.contourArea(cnt)
+        if area<500:
+            continue
+        if area > area1:
+            area4 = area3
+            idx4 = idx3
+            area3 = area2
+            idx3 = idx2
+            area2 = area1
+            idx2 = idx1
+            area1 = area
+            idx1 = idx
+        elif area > area2:
+            area4 = area3
+            idx4 = idx3
+            area3 = area2
+            idx3 = idx2
+            area2 = area
+            idx2 = idx
+        elif area > area3:
+            area4 = area3
+            idx4 = idx3
+            area3 = area
+            idx3 = idx
+        elif area > area4:
+            area4 = area
+            idx4 = idx
+
+    center_point_list = []# b保存结果
+    for i in [idx1,idx2,idx3,idx4]:
+        if idx==-1:
+            continue
+        M=cv2.moments(contours[i])
+        if M['m00']==0:
+                M['m00']=0.001
+        cx = int(M['m10']/M['m00'])
+        cy = int(M['m01']/M['m00'])
+        img_origin = cv2.circle(img_origin,(cx,cy),1,[255,0,0],5)
+        center_point = (cx,cy)
+        center_point_list.append(center_point)
+        img_origin = cv2.putText(img_origin,"(%d,%d)"%(cx,cy),center_point,cv2.FONT_HERSHEY_PLAIN,2,(0,0,255))
+        img_origin = cv2.drawContours(img_origin,contours[i],-1,[255,255,0],3)
+    print("Area Max 4:",area1,area2,area3,area4)
+    return img_origin
 
 
 def cameraLoop():

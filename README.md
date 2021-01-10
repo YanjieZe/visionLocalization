@@ -47,6 +47,8 @@ new version
 
 颜色分割的结果意外地好。开始进行轮廓的识别和位置的计算。
 
+面积筛选和中心点计算已完成，效果很好！详情见**redContourExtract**
+
 # Bug log
 ## 1."bort" (this may appear on MacOS)
 solution: 
