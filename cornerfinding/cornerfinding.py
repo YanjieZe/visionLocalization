@@ -1,5 +1,6 @@
 import cv2
-
+import mvsdk
+import mvcamera
 
 def getCropped(picture, label):
     
@@ -107,32 +108,66 @@ def findCorner(img):
     return img
 
 
+def cameraLoop():
+        DevList = mvsdk.CameraEnumerateDevice()
+        nDev = len(DevList)
+        if nDev < 1:
+            print("No camera was found!")
+            return
+
+        for i, DevInfo in enumerate(DevList):
+            print("{}: {} {}".format(i, DevInfo.GetFriendlyName(), DevInfo.GetPortType()))
+
+        cams = []
+        for i in map(lambda x: int(x), raw_input("Select cameras: ").split()):
+            cam = Camera(DevList[i])
+            if cam.open():
+                cams.append(cam)
+
+        while (cv2.waitKey(1) & 0xFF) != ord('q'):
+            for cam in cams:
+                frame = cam.grab()
+                if frame is not None:
+                    frame = cv2.resize(frame, (640,480), interpolation = cv2.INTER_LINEAR)
+                    img = findCorner(frame)
+                    cv2.imshow("{} Press q to end".format(cam.DevInfo.GetFriendlyName()), frame)
+
+        for cam in cams:
+            cam.close()
+
+
 if __name__=="__main__":
-    '''
-    读取label
-    '''
-    labelfile = open('36.txt','r',encoding='utf-8')
-    # label格式：class ，x_center ，y_center ，width， height
-    # 对应：      0       1            2        3       4
-    label = labelfile.readline().split(' ')
-    labelfile.close()
-    float_label = []
-    for num in  label:
-        float_label.append(float(num))
-    label = float_label
+    mode = "camera"
 
-    '''
-    读取picture
-    '''
-    picture = cv2.imread('36.jpg')
+    if mode == "img":
+        '''
+        读取label
+        '''
+        labelfile = open('36.txt','r',encoding='utf-8')
+        # label格式：class ，x_center ，y_center ，width， height
+        # 对应：      0       1            2        3       4
+        label = labelfile.readline().split(' ')
+        labelfile.close()
+        float_label = []
+        for num in  label:
+            float_label.append(float(num))
+        label = float_label
 
-    img = getCropped(picture, label)
-    img = findCorner(img)
-    '''
-    debug区
-    '''
-    cv2.imshow('croped', img)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+        '''
+        读取picture
+        '''
+        picture = cv2.imread('36.jpg')
 
-
+        img = getCropped(picture, label)
+        img = findCorner(img)
+        '''
+        debug区
+        '''
+        cv2.imshow('croped', img)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+    elif mode=="camera":
+        try:
+            cameraLoop()
+        finally:
+            cv2.destroyAllWindows()
