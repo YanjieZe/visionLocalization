@@ -46,11 +46,15 @@ def findCorner(img):
     idx1 = -1
     idx2 = -1
     idx3 = -1
-    if len(contours)<3:
-        '''
-        这里等下要重写，改成能重新调整阈值进行匹配
-        '''
-        raise "contours not enough"
+    if len(contours)==0:
+        print("Currently contours num is equal to Zero!")
+        return img
+    if len(contours)==1:
+        img = cv2.drawContours(img,contours,-1,[255,255,0],2)
+        return img
+    if len(contours)==2:
+        img = cv2.drawContours(img,contours,-1,[255,255,0],2)
+        return img
 
     for idx,cnt in enumerate(contours):
         area = cv2.contourArea(cnt)
@@ -73,7 +77,8 @@ def findCorner(img):
     for i in [idx1,idx2,idx3]:
         #计算轮廓中心点
         M=cv2.moments(contours[i])
-        
+        if M['m00']==0:
+                M['m00']=0.001
         cx = int(M['m10']/M['m00'])
         cy = int(M['m01']/M['m00'])
         img = cv2.circle(img,(cx,cy),1,[255,0,0],5)
@@ -83,9 +88,12 @@ def findCorner(img):
     # 这里是找到了中心字母和字符的轮廓了，并且标了出来
 
 
+
     '''
     通过几何形状逼近找出右下角小方块
     '''
+    square_idx_list = []
+    center_point_list = []
     for i in range(len(contours)):
         # 轮廓逼近
         epsilon = 0.01 * cv2.arcLength(contours[i], True)
@@ -95,15 +103,41 @@ def findCorner(img):
         shape_type = ""
         if corners == 4:
             M=cv2.moments(contours[i])
+            if M['m00']==0:
+                M['m00']=0.001
+            
             cx = int(M['m10']/M['m00'])
             cy = int(M['m01']/M['m00'])
             img = cv2.circle(img,(cx,cy),1,[255,0,0],5)
             center_point = (cx,cy)
-            img = cv2.putText(img,"(%d,%d)"%(cx,cy),center_point,cv2.FONT_HERSHEY_PLAIN,0.5,(0,0,255))
-            img = cv2.drawContours(img, contours,i,[255,255,0],2)
+            center_point_list.append(center_point)
+            square_idx_list.append(i)
+    # 找到所有近似方形的轮廓，找到面积最大的看看 
+    square_idx = -1
+    area_max = 0      
+    for idx in square_idx_list:
+        if idx==idx1 or idx==idx2 or idx==idx3:
+            continue
+        area = cv2.contourArea(contours[i])
+        if area > area_max:
+            area_max = area
+            square_idx = idx
+    # 如果等于-1.说明没有找到小方块        
+    if square_idx ==-1:
+        print("can't find the square!")
+    elif len(center_point_list)<=0:
+        return img
+    else:
+        M=cv2.moments(contours[square_idx])
+        if M['m00']==0:
+                M['m00']=0.001
+        square_center_x = int(M['m10']/M['m00'])
+        square_center_y = int(M['m01']/M['m00'])    
+        square_center = (square_center_x,square_center_y)
+
+        img = cv2.putText(img,"(%d,%d)"%(square_center_x,square_center_y),square_center,cv2.FONT_HERSHEY_PLAIN,0.5,(0,0,255))
+        img = cv2.drawContours(img, contours,i,[255,255,0],2)
             
-
-
 
     return img
 
@@ -119,8 +153,8 @@ def cameraLoop():
             print("{}: {} {}".format(i, DevInfo.GetFriendlyName(), DevInfo.GetPortType()))
 
         cams = []
-        for i in map(lambda x: int(x), raw_input("Select cameras: ").split()):
-            cam = Camera(DevList[i])
+        for i in map(lambda x: int(x), input("Select cameras: ").split()):
+            cam = mvcamera.Camera(DevList[i])
             if cam.open():
                 cams.append(cam)
 
@@ -130,6 +164,7 @@ def cameraLoop():
                 if frame is not None:
                     frame = cv2.resize(frame, (640,480), interpolation = cv2.INTER_LINEAR)
                     img = findCorner(frame)
+        
                     cv2.imshow("{} Press q to end".format(cam.DevInfo.GetFriendlyName()), frame)
 
         for cam in cams:
@@ -168,6 +203,7 @@ if __name__=="__main__":
         cv2.destroyAllWindows()
     elif mode=="camera":
         try:
+            print("camera mode beginning....")
             cameraLoop()
         finally:
             cv2.destroyAllWindows()
