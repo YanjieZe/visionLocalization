@@ -2,6 +2,7 @@ import cv2
 import mvsdk
 import mvcamera
 import numpy as np
+import argparse
 
 def getCropped(picture, label):
     
@@ -23,8 +24,10 @@ def getCropped(picture, label):
 
     return img_cropped
 
+
+
 '''
-角点检测算法
+根据中心字符位置进行判断的角点检测算法
 '''
 def findCorner(img):
     
@@ -151,8 +154,10 @@ def findCorner(img):
 
     return img
 
+
+
 '''
-根据颜色提取轮廓
+根据颜色提取轮廓的角点检测算法
 '''
 def redContourExtract(img):
     img_origin = img.copy()
@@ -239,7 +244,28 @@ def redContourExtract(img):
     return img_origin
 
 
-def cameraLoop():
+'''
+通过鼠标获得hsv数值的自动调参算法
+'''
+def autoHSVget(img):
+    
+    img_HSV=cv2.cvtColor(img,cv2.COLOR_BGR2HSV)
+
+    def getpos(event,x,y,flags,param):
+        if event==cv2.EVENT_LBUTTONDOWN: #定义一个鼠标左键按下去的事件
+            print(img_HSV[y,x])
+
+    cv2.imshow("imageHSV",img_HSV)
+    cv2.imshow('image',img)
+    cv2.setMouseCallback("imageHSV",getpos)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
+
+'''
+使用mind vision相机进行角点检测
+'''
+def CameraLoopCornerFinding():
         DevList = mvsdk.CameraEnumerateDevice()
         nDev = len(DevList)
         if nDev < 1:
@@ -263,7 +289,7 @@ def cameraLoop():
                     '''
                     输入frame处，在此对frame做修改
                     '''
-                    frame = redContourExtract(frame)
+                    frame = findCorner(frame)
                 
                     cv2.imshow("{} Press q to end".format(cam.DevInfo.GetFriendlyName()), frame)
 
@@ -271,10 +297,14 @@ def cameraLoop():
             cam.close()
 
 
+parser = argparse.ArgumentParser(description='corner point detection')
 
+parser.add_argument('--mode',dest='mode', type=str,required=True,
+                    help='choose the mode, camera or img or test')
+args = parser.parse_args()
 
 if __name__=="__main__":
-    mode = "camera"
+    mode = args.mode
 
     if mode == "img":
         '''
@@ -303,9 +333,14 @@ if __name__=="__main__":
         cv2.imshow('croped', img)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
-    elif mode=="camera":
+
+    elif mode == "camera":
         try:
             print("camera mode beginning....")
-            cameraLoop()
+            CameraLoopCornerFinding()
         finally:
             cv2.destroyAllWindows()
+
+    elif mode == "test":
+        img = cv2.imread("36.jpg")
+        autoHSVget(img)

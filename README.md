@@ -59,6 +59,8 @@ then:
 
 第六个想法，通过实时获得hsv值对想要得到的区域进行标定，再进行检测，即部分自动参数设置功能。
 
+写好了一个取参数的函数**autoHSVget**
+
 # Bug log
 ## 1."bort" (this may appear on MacOS)
 solution: 
