@@ -202,7 +202,8 @@ def redContourExtract(img):
 
     for idx,cnt in enumerate(contours):
         area = cv2.contourArea(cnt)
-        if area<500:
+        minArea = 500 # 这个参数很重要
+        if area<minArea:
             continue
         if area > area1:
             area4 = area3
