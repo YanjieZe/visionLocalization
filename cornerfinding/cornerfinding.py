@@ -166,11 +166,11 @@ def redContourExtract(img):
     img_origin = img.copy()
     img = cv2.cvtColor(img,cv2.COLOR_BGR2HSV)
     # range of red
-    lower_red = np.array([130, 90, 20])
-    upper_red = np.array([180, 180, 80])
+    lower_red = np.array([150, 120, 20])
+    upper_red = np.array([180, 180, 60])
 
-    lower_red2 = np.array([0, 60, 60])
-    upper_red2 = np.array([20, 250, 150])  # thers is two ranges of red
+    lower_red2 = np.array([0, 120, 20])
+    upper_red2 = np.array([20, 180, 60])  # thers is two ranges of red
 
     mask_r = cv2.inRange(img, lower_red, upper_red)
 
@@ -231,22 +231,25 @@ def redContourExtract(img):
 
     center_point_list = []# b保存结果
     for i in [idx1,idx2,idx3,idx4]:
-        if idx==-1:
+        if i==-1:
+            continue
+        if cv2.contourArea(contours[i])==0:
             continue
         M=cv2.moments(contours[i])
         if M['m00']==0:
                 M['m00']=0.001
         cx = int(M['m10']/M['m00'])
         cy = int(M['m01']/M['m00'])
-        img_origin = cv2.circle(img_origin,(cx,cy),1,[255,0,0],5)
+        img_origin = cv2.circle(img_origin,(cx,cy),1,[255,0,255],5)
         center_point = (cx,cy)
         center_point_list.append(center_point)
         img_origin = cv2.putText(img_origin,"(%d,%d)"%(cx,cy),center_point,cv2.FONT_HERSHEY_PLAIN,2,(0,255,255),2)
-        img_origin = cv2.drawContours(img_origin,contours[i],-1,[255,255,0],3)
-    print("Area Max 4:",area1,area2,area3,area4)
+        img_origin = cv2.drawContours(img_origin,contours,i,[255,0,255],3)
+
+    # print("Area Max 4:",area1,area2,area3,area4)
     time_end = time.time()
-    deltatime = time_start - time_end
-    print("one frame time:",deltatime)
+    deltatime = time_end - time_start
+    # print("one frame time:",deltatime)
     return img_origin
 
 
@@ -321,7 +324,7 @@ def CameraLoopCornerFinding1():
                     '''
                     frame = redContourExtract(frame)
                 
-                    cv2.imshow("Vision Localization V1.0".format(cam.DevInfo.GetFriendlyName()), frame)
+                    cv2.imshow("Vision Localization V2.0".format(cam.DevInfo.GetFriendlyName()), frame)
                     current_time = time.time()
                     delta_time = current_time - origin_time
                     origin_time = current_time
@@ -338,7 +341,7 @@ def CameraLoopCornerFinding1():
 
 
 '''
-使用apriltag算法
+使用apriltag算法，暂时没写好
 '''
 def CameraLoopCornerFinding2():
         DevList = mvsdk.CameraEnumerateDevice()
@@ -380,7 +383,7 @@ def CameraLoopCornerFinding2():
                     origin_time = current_time
                     time_all += delta_time
 
-                    if frameecount==100:#每100帧计算一次
+                    if framecount==100:#每100帧计算一次
                         fps = framecount/time_all
                         time_all = 0
                         framecount = 0
@@ -415,13 +418,8 @@ if __name__=="__main__":
             cv2.destroyAllWindows()
 
     elif mode == "test":
-        ap = Apriltag()
-        ap.create_detector(debug=True)
-        filename = 'example.jpg'
-        frame = cv2.imread(filename)
-        detections = ap.detect(frame)
-
-        if len(detections) > 0:
-            print('识别成功')
-        else:
-            print('识别失败')
+        img = cv2.imread("example.jpg")
+        
+        img = redContourExtract(img)
+        cv2.imshow("img",img)
+        cv2.waitKey(0)

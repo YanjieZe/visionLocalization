@@ -90,6 +90,14 @@ then:
 
 
 
+RedContourExtract算法优化进行中。
+
+出现的问题：轮廓重识别。解决方法：在计算中心点时进行判断，若有两个轮廓的中心点相邻很近，排除。但是直接通过优化面积的算法解决了。
+
+优化以后，效果：**fps=34.5**
+
+
+
 # Ⅲ Bug log
 
 ## 1."bort" (this may appear on MacOS)
