@@ -1,6 +1,17 @@
 # CornerPointDetection
 YanjieZe(the Last Refugee)
-# Use method
+
+# 目录
+
+[Ⅰ Use method]()
+
+[Ⅱ Process Log]()
+
+[Ⅲ Bug log]()
+
+
+
+# Ⅰ Use method
 
 ## 1 use web cam for detection
 old version
@@ -21,7 +32,10 @@ this python file is in another folder.So you should first:
 then:
 > python cornerfinding.py --mode camera
 
-# Process Log
+
+
+# Ⅱ Process Log
+
 **2020.11.13** 开始尝试写基本的框架。初步使用电脑自带的webcam进行检测。
 
 **2020.12.13** 使用yolov5模型训练完成（使用自己标定的数据集）
@@ -38,7 +52,7 @@ then:
 
 因此第四个想法，再进一步优化一下，将轮廓逼近法之后再用面积比较法筛选一下试一试。
 
-**2021.01.10** continuing modify
+**2021.01.10** continuing modifying
 昨天的第四个想法实现之后，开始用mind vision camera进行实时检测。
 发现在实时检测之中，有可能出现找不到矩形框的情况。做了一些优化。
 目前尚存在的问题：可能会检测出很小的轮廓。
@@ -64,11 +78,19 @@ then:
 使用**auotoHSVget**进行了参数调节，获得了正常曝光度情况下的结果，还不错！
 ![](localizationV2.gif)
 
-**2021.01.11** continuing modify
+**2021.01.11** continuing modifying
 
 为提高精度，开始尝试用apriltag算法。
 
-# Bug log
+附上一个靠谱的链接：[apriltag算法讲解](https://blog.csdn.net/han784851198/article/details/90261197?ops_request_misc=%25257B%252522request%25255Fid%252522%25253A%252522161033232116780258054111%252522%25252C%252522scm%252522%25253A%25252220140713.130102334.pc%25255Fall.%252522%25257D&request_id=161033232116780258054111&biz_id=0&utm_medium=distribute.pc_search_result.none-task-blog-2~all~first_rank_v2~rank_v29-1-90261197.pc_search_result_cache&utm_term=apriltag)
+
+一个上午在看apriltag的算法和实现代码。首先直接使用了一下代码，发现效果不好，然后想了一下具体问题在于：这个算法用了凸包算法，但是我要检测的tag上只有一个算是凸包，还有三个是凹陷的。因此这个算法用来检测二维码还不错，检测这种奇怪的凹下去的形状就不太行了。
+
+因此，在尝试了一上午后，还是决定用自己昨天写的算法，再借鉴apriltag算法中的一些东西做一下优化。
+
+
+
+# Ⅲ Bug log
 
 ## 1."bort" (this may appear on MacOS)
 solution: 

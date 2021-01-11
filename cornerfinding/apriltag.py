@@ -59,10 +59,12 @@ class Apriltag(object):
 #            img = cv2.GaussianBlur(img, (7, 7), self._quad_sigma)
             if (self._debug):
                 print("Adaptive thresholding")
-
+        elif self._thresholding == 'redcontour':
+            pass
         else:
             if (self._debug):
                 print("do not have this methon")
+
 
 
         ##################################
@@ -130,6 +132,8 @@ class Apriltag(object):
             plt.show()
         ##################################
         """
-        5 decode and get detections
+        5 定位
         """
-        return self.tagfamily.decodeQuad(quads,gray)
+        cv2.imshow("yanjieze",frame)
+        cv2.waitKey(0)
+        return frame
