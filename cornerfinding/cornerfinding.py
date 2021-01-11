@@ -3,6 +3,8 @@ import mvsdk
 import mvcamera
 import numpy as np
 import argparse
+import time
+from apriltag import Apriltag
 
 def getCropped(picture, label):
     
@@ -27,9 +29,9 @@ def getCropped(picture, label):
 
 
 '''
-根据中心字符位置进行判断的角点检测算法
+根据中心字符位置进行判断的角点检测算法，1
 '''
-def findCorner(img):
+def findCornerByCenter(img):
     
     img_blur = cv2.GaussianBlur(img, (3,3),0)
     threshold1 = 100
@@ -157,9 +159,10 @@ def findCorner(img):
 
 
 '''
-根据颜色提取轮廓的角点检测算法
+根据颜色提取轮廓的角点检测算法，2
 '''
 def redContourExtract(img):
+    time_start = time.time()
     img_origin = img.copy()
     img = cv2.cvtColor(img,cv2.COLOR_BGR2HSV)
     # range of red
@@ -241,7 +244,28 @@ def redContourExtract(img):
         img_origin = cv2.putText(img_origin,"(%d,%d)"%(cx,cy),center_point,cv2.FONT_HERSHEY_PLAIN,2,(0,255,255),2)
         img_origin = cv2.drawContours(img_origin,contours[i],-1,[255,255,0],3)
     print("Area Max 4:",area1,area2,area3,area4)
+    time_end = time.time()
+    deltatime = time_start - time_end
+    print("one frame time:",deltatime)
     return img_origin
+
+
+'''
+借鉴apriltag算法的角点检测算法，3
+'''
+def apriltagFindCorner(frame):
+    gray = np.array(cv2.cvtColor(frame,cv2.COLOR_RGB2GRAY))
+
+    '''
+    1.blur
+    '''
+
+    pass
+
+
+
+
+
 
 
 '''
@@ -263,9 +287,9 @@ def autoHSVget(img):
 
 
 '''
-使用mind vision相机进行角点检测
+使用mind vision相机进行角点检测，使用自撰算法，版本V1
 '''
-def CameraLoopCornerFinding():
+def CameraLoopCornerFinding1():
         DevList = mvsdk.CameraEnumerateDevice()
         nDev = len(DevList)
         if nDev < 1:
@@ -281,9 +305,13 @@ def CameraLoopCornerFinding():
             if cam.open():
                 cams.append(cam)
 
+        framecount = 0
+        origin_time = time.time()
+        time_all = 0
         while (cv2.waitKey(1) & 0xFF) != ord('q'):
             for cam in cams:
                 frame = cam.grab()
+                framecount+=1
                 if frame is not None:
                     frame = cv2.resize(frame, (640,480), interpolation = cv2.INTER_LINEAR)
                     
@@ -294,11 +322,72 @@ def CameraLoopCornerFinding():
                     frame = redContourExtract(frame)
                 
                     cv2.imshow("Vision Localization V1.0".format(cam.DevInfo.GetFriendlyName()), frame)
-                    
+                    current_time = time.time()
+                    delta_time = current_time - origin_time
+                    origin_time = current_time
+                    time_all += delta_time
+
+                    if framecount==100:#每1s计算一次
+                        fps = framecount/time_all
+                        time_all = 0
+                        framecount = 0
+                        print("current fps:", fps)
 
         for cam in cams:
             cam.close()
 
+
+'''
+使用apriltag算法
+'''
+def CameraLoopCornerFinding2():
+        DevList = mvsdk.CameraEnumerateDevice()
+        nDev = len(DevList)
+        if nDev < 1:
+            print("No camera was found!")
+            return
+
+        for i, DevInfo in enumerate(DevList):
+            print("{}: {} {}".format(i, DevInfo.GetFriendlyName(), DevInfo.GetPortType()))
+
+        cams = []
+        for i in map(lambda x: int(x), input("Select cameras: ").split()):
+            cam = mvcamera.Camera(DevList[i])
+            if cam.open():
+                cams.append(cam)
+
+        framecount = 0
+        origin_time = time.time()
+        time_all = 0
+
+        
+        while (cv2.waitKey(1) & 0xFF) != ord('q'):
+            for cam in cams:
+                frame = cam.grab()
+                framecount+=1
+                if frame is not None:
+                    frame = cv2.resize(frame, (640,480), interpolation = cv2.INTER_LINEAR)
+                    
+                    
+                    '''
+                    输入frame处，在此对frame做修改
+                    '''
+                    frame = redContourExtract(frame)
+                
+                    cv2.imshow("Vision Localization V1.0".format(cam.DevInfo.GetFriendlyName()), frame)
+                    current_time = time.time()
+                    delta_time = current_time - origin_time
+                    origin_time = current_time
+                    time_all += delta_time
+
+                    if frameecount==100:#每100帧计算一次
+                        fps = framecount/time_all
+                        time_all = 0
+                        framecount = 0
+                        print("current fps:", fps)
+
+        for cam in cams:
+            cam.close()
 
 parser = argparse.ArgumentParser(description='corner point detection')
 
@@ -321,10 +410,18 @@ if __name__=="__main__":
     elif mode == "camera":
         try:
             print("camera mode beginning....")
-            CameraLoopCornerFinding()
+            CameraLoopCornerFinding1()
         finally:
             cv2.destroyAllWindows()
 
     elif mode == "test":
-        img = cv2.imread("36.jpg")
-        autoHSVget(img)
+        ap = Apriltag()
+        ap.create_detector(debug=True)
+        filename = 'example.jpg'
+        frame = cv2.imread(filename)
+        detections = ap.detect(frame)
+
+        if len(detections) > 0:
+            print('识别成功')
+        else:
+            print('识别失败')

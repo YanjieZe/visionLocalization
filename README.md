@@ -22,13 +22,13 @@ then:
 > python cornerfinding.py --mode camera
 
 # Process Log
-**2020.11.13** start to write some bullshit
+**2020.11.13** 开始尝试写基本的框架。初步使用电脑自带的webcam进行检测。
 
-**2020.12.13** finish the RMset version 1.0 and use yolov5 to get over 80% accuracy
+**2020.12.13** 使用yolov5模型训练完成（使用自己标定的数据集）
 
 **2020.12.17** finish the collection module(grabFrame.py): **connect the mindvision camera and auto collect frame as the raw dataset**
 
-**2021.01.08** start to modify the code but then decide to write **corner detection** first
+**2021.01.09** start to modify the code but then decide to write **corner detection** first
 开始自己尝试写角点检测算法。第一个想法是先把他切割出来，就是用yolo分割的结果做一个切割。简单的**getCropped()**实现一下。
 第二个想法是用这个tag最明显的位置来进行角点的推算，有两个很容易检测的位置：中间的字母，右下角的一个小方块。那么我就先把轮廓提取出来，再把这两个的轮廓拿出来，求一下中心点的位置，就可以得到描述这个tag的两个特征。先把这个想法实现一下吧。得到这两个中心点的坐标后tag的四个角点坐标基本就出来了。
 
@@ -38,7 +38,7 @@ then:
 
 因此第四个想法，再进一步优化一下，将轮廓逼近法之后再用面积比较法筛选一下试一试。
 
-**2021.01.09** continuing modify
+**2021.01.10** continuing modify
 昨天的第四个想法实现之后，开始用mind vision camera进行实时检测。
 发现在实时检测之中，有可能出现找不到矩形框的情况。做了一些优化。
 目前尚存在的问题：可能会检测出很小的轮廓。
@@ -64,8 +64,13 @@ then:
 使用**auotoHSVget**进行了参数调节，获得了正常曝光度情况下的结果，还不错！
 ![](localizationV2.gif)
 
+**2021.01.11** continuing modify
+
+为提高精度，开始尝试用apriltag算法。
 
 # Bug log
+
 ## 1."bort" (this may appear on MacOS)
 solution: 
+
 > sudo code .
