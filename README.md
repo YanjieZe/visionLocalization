@@ -114,6 +114,8 @@ RedContourExtract算法优化进行中。
 
 很久没有碰过PnP了。上午看了一下知乎和博客，回顾了**对极几何**和**PnP**。
 
+附上一个还不错的讲解：[视觉SLAM:搞定坐标系、三角测量、PnP](https://zhuanlan.zhihu.com/p/80921759)
+
 下午写一下算法进行实战。
 
 # Ⅲ Bug log
