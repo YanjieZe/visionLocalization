@@ -1,14 +1,9 @@
-import cv2
-from apriltag import Apriltag
-import matplotlib.pyplot as plt
+import numpy as np
 
-ap = Apriltag()
-ap.create_detector(debug=False)
-filename = 'tag.png'
-frame = cv2.imread(filename)
-detections = ap.detect(frame)
+point_world1 = np.array([0,0,0])
+point_world2 = np.array([16,0,0])
+point_world3 = np.array([0,21,0])
+point_world4 = np.array([16,21,0])
 
-if len(detections) > 0:
-    print('识别成功')
-else:
-    print('识别失败')
+point_world = np.stack([point_world1,point_world2,point_world3,point_world4])
+print(point_world.shape)

@@ -184,7 +184,8 @@ def redContourExtract(img):
     # 这里已经可以得到四个角的很明显的图像。
 
     # 面积筛选
-    
+    center_point_list = []# 保存结果
+
     _,contours,hierarchy = cv2.findContours(img,cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
     area1 = 0
@@ -198,7 +199,7 @@ def redContourExtract(img):
 
     if len(contours)==0:
         print("Currently contours num is equal to Zero!")
-        return img
+        return img,center_point_list
 
     for idx,cnt in enumerate(contours):
         area = cv2.contourArea(cnt)
@@ -230,7 +231,7 @@ def redContourExtract(img):
             area4 = area
             idx4 = idx
 
-    center_point_list = []# b保存结果
+    
     for i in [idx1,idx2,idx3,idx4]:
         if i==-1:
             continue
@@ -241,6 +242,8 @@ def redContourExtract(img):
                 M['m00']=0.001
         cx = int(M['m10']/M['m00'])
         cy = int(M['m01']/M['m00'])
+        if i == idx1:
+            print("the maxArea center point:",cx,cy)
         img_origin = cv2.circle(img_origin,(cx,cy),1,[255,0,255],5)
         center_point = (cx,cy)
         center_point_list.append(center_point)
@@ -251,7 +254,8 @@ def redContourExtract(img):
     time_end = time.time()
     deltatime = time_end - time_start
     # print("one frame time:",deltatime)
-    return img_origin
+    return img_origin,center_point_list
+
 
 
 '''
@@ -267,8 +271,48 @@ def apriltagFindCorner(frame):
     pass
 
 
+'''
+用PNP解算相机位置的算法
+'''
+def solvePoint(center_point_list):
+    point_num = len(center_point_list)
+    if point_num<3:
+        print("Currently can't solve PnP problem!")
+        return 
 
+    camera_intrinsic_matrix = np.array(
+        [[1557.90406532275,0,0],
+        [0,1543.49983613257,0],
+        [680.204169094410,644.295104426977,1]])
+    
+    # 这个矩阵这样写不知道对不对？
+    camera_distortion = np.array(
+        [-0.152787687060218,0.275768296110960,0,0]
+    )
 
+    '''
+    World
+    右下角方块角点：（0，0，0）
+
+    右上角：（16，0，0）
+
+    左下角：（0，21，0）
+
+    左上角：（16，21，0）
+    '''
+    point_world1 = np.array([0,0,0])
+    point_world2 = np.array([16,0,0])
+    point_world3 = np.array([0,21,0])
+    point_world4 = np.array([16,21,0])
+
+    if point_num==4:
+       '''
+       这里放一个判断相对位置的算法
+       '''
+       point_world = np.stack([point_world1,point_world2,point_world3,point_world4]) # shape: 4*3
+       point_image = np.stack([center_point_list[0],center_point_list[1],center_point_list[2],center_point_list[3]])
+       rotation, translation = cv2.solvePnP (point_world,point_image,camera_intrinsic_matrix,camera_distortion)
+       print("rotation", rotation)
 
 
 
@@ -323,9 +367,9 @@ def CameraLoopCornerFinding1():
                     '''
                     输入frame处，在此对frame做修改
                     '''
-                    frame = redContourExtract(frame)
-                
-                    cv2.imshow("Vision Localization V2.0".format(cam.DevInfo.GetFriendlyName()), frame)
+                    frame_detection,centerpoint_list = redContourExtract(frame)
+
+                    cv2.imshow("Vision Localization V2.0".format(cam.DevInfo.GetFriendlyName()), frame_detection)
                     current_time = time.time()
                     delta_time = current_time - origin_time
                     origin_time = current_time
@@ -393,6 +437,14 @@ def CameraLoopCornerFinding2():
         for cam in cams:
             cam.close()
 
+
+
+
+
+
+
+
+
 parser = argparse.ArgumentParser(description='corner point detection')
 
 parser.add_argument('--mode',dest='mode', type=str,required=True,
@@ -419,8 +471,13 @@ if __name__=="__main__":
             cv2.destroyAllWindows()
 
     elif mode == "test":
-        img = cv2.imread("example.jpg")
+
         
-        img = redContourExtract(img)
-        cv2.imshow("img",img)
-        cv2.waitKey(0)
+        a = np.array([1,1])
+        b = np.array([17,1])
+        c = np.array([1,22])
+        d = np.array([17,22])
+        point_list = [a,b,c,d]
+        solvePoint(point_list)
+    else:
+        print("Error:This mode is not available")
