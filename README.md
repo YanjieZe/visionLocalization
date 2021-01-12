@@ -36,13 +36,19 @@ then:
 
 # Ⅱ Process Log
 
-**2020.11.13** 开始尝试写基本的框架。初步使用电脑自带的webcam进行检测。
+## **2020.11.13** start to write the code structure and detection algorithm
 
-**2020.12.13** 使用yolov5模型训练完成（使用自己标定的数据集）
+初步使用电脑自带的webcam进行检测。
 
-**2020.12.17** finish the collection module(grabFrame.py): **connect the mindvision camera and auto collect frame as the raw dataset**
+## **2020.12.13** finish training YOLOV5 model
 
-**2021.01.09** start to modify the code but then decide to write **corner detection** first
+使用自己标定的数据集
+
+## **2020.12.17** finish the collection module(grabFrame.py):
+
+**connect the mindvision camera and auto collect frame as the raw dataset**
+
+## **2021.01.09** start to modify the code but then decide to write **corner detection** first
 开始自己尝试写角点检测算法。第一个想法是先把他切割出来，就是用yolo分割的结果做一个切割。简单的**getCropped()**实现一下。
 第二个想法是用这个tag最明显的位置来进行角点的推算，有两个很容易检测的位置：中间的字母，右下角的一个小方块。那么我就先把轮廓提取出来，再把这两个的轮廓拿出来，求一下中心点的位置，就可以得到描述这个tag的两个特征。先把这个想法实现一下吧。得到这两个中心点的坐标后tag的四个角点坐标基本就出来了。
 
@@ -52,7 +58,7 @@ then:
 
 因此第四个想法，再进一步优化一下，将轮廓逼近法之后再用面积比较法筛选一下试一试。
 
-**2021.01.10** continuing modifying
+## **2021.01.10** continuing modifying
 昨天的第四个想法实现之后，开始用mind vision camera进行实时检测。
 发现在实时检测之中，有可能出现找不到矩形框的情况。做了一些优化。
 目前尚存在的问题：可能会检测出很小的轮廓。
@@ -78,7 +84,7 @@ then:
 使用**auotoHSVget**进行了参数调节，获得了正常曝光度情况下的结果，还不错！
 ![](localizationV2.gif)
 
-**2021.01.11** continuing modifying
+## **2021.01.11** continuing modifying
 
 为提高精度，开始尝试用apriltag算法。
 
@@ -101,6 +107,14 @@ RedContourExtract算法优化进行中。
 
 
 出现的问题：对于远距离识别，minArea要小，不然就找不到轮廓。对于近距离识别，minArea要大，不然就轮廓太多，会有噪声。
+
+## **2021.01.12** start writing **PnP**
+
+优化暂时到此为止，这几天的主要任务是写PnP算法，求解相机位置。
+
+很久没有碰过PnP了。上午看了一下知乎和博客，回顾了**对极几何**和**PnP**。
+
+下午写一下算法进行实战。
 
 # Ⅲ Bug log
 
