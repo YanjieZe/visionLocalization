@@ -184,8 +184,10 @@ def redContourExtract(img):
     mask = mask_r + mask_r2 + mask_r3
     
     kernel = np.ones((3,3))
+    
     img = cv2.dilate(mask,kernel)
     img = cv2.erode(img,kernel)
+    cv2.imshow("img",mask)
     # 这里已经可以得到四个角的很明显的图像。
 
     # 面积筛选
