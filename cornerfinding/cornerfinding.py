@@ -167,13 +167,13 @@ def redContourExtract(img):
     img = cv2.cvtColor(img,cv2.COLOR_BGR2HSV)
     # range of red
     lower_red = np.array([150, 60, 20])
-    upper_red = np.array([190, 150, 60])
+    upper_red = np.array([200, 160, 60])
 
     lower_red2 = np.array([0, 120, 20])
     upper_red2 = np.array([30, 160, 60])  # thers is two ranges of red
 
     lower_red3 = np.array([110,30,40])
-    upper_red3 = np.array([180,80,80])
+    upper_red3 = np.array([200,100,80])
 
     mask_r = cv2.inRange(img, lower_red, upper_red)
 
@@ -187,7 +187,6 @@ def redContourExtract(img):
     
     img = cv2.dilate(mask,kernel)
     img = cv2.erode(img,kernel)
-    cv2.imshow("img",mask)
     # 这里已经可以得到四个角的很明显的图像。
 
     # 面积筛选
@@ -208,9 +207,10 @@ def redContourExtract(img):
         print("Currently contours num is equal to Zero!")
         return img,center_point_list
 
+
     for idx,cnt in enumerate(contours):
+        minArea = 0 # 这个参数很重要
         area = cv2.contourArea(cnt)
-        minArea = 500 # 这个参数很重要
         if area<minArea:
             continue
         if area > area1:
@@ -238,6 +238,30 @@ def redContourExtract(img):
             area4 = area
             idx4 = idx
 
+    '''
+    形状测试
+    '''
+    '''
+    img_1 = img_origin.copy()
+    for i in [idx1,idx2,idx3,idx4]:
+        cnt = contours[i]
+        area = cv2.contourArea(cnt)
+
+        perimeter = cv2.arcLength(cnt,True)
+        epsilon = 0.01*cv2.arcLength(cnt,True)
+        approx = cv2.approxPolyDP(cnt,epsilon,True)
+        side = len(approx)
+
+        rect= cv2.minAreaRect(approx)
+        box = cv2.boxPoints(rect)
+        box = np.int0(box)
+       
+        cv2.drawContours(img_1,[box],-1,[255,255,0],3)
+        
+        
+    cv2.imshow("img",img_1)
+    cv2.waitKey(1)
+    '''
     
     for i in [idx1,idx2,idx3,idx4]:
         if i==-1:

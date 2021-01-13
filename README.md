@@ -232,6 +232,16 @@ RedContourExtract算法优化进行中。
 
 ![](localizationV3.gif)
 
+
+
+为增加鲁棒性，试着增加一个形状识别和相对位置筛选。
+
+尝试用测试形状的方法去做，效果不好。
+
+暂时没有新的优化思路了。
+
+
+
 # Ⅲ Bug log
 
 ## 1."bort" (this may appear on MacOS)
