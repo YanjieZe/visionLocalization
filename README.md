@@ -246,6 +246,12 @@ RedContourExtract算法优化进行中。
 
 
 
+改写yolo：
+
+尝试1：将dataset.py的loadstream对象修改
+
+尝试成功，但是有一些问题。还是考虑从detect函数里改。
+
 # Ⅲ Bug log
 
 ## 1."bort" (this may appear on MacOS)

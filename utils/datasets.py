@@ -21,7 +21,8 @@ from tqdm import tqdm
 
 from utils.general import xyxy2xywh, xywh2xyxy
 from utils.torch_utils import torch_distributed_zero_first
-
+import mvcamera
+import mvsdk
 # Parameters
 help_url = 'https://github.com/ultralytics/yolov5/wiki/Train-Custom-Data'
 img_formats = ['bmp', 'jpg', 'jpeg', 'png', 'tif', 'tiff', 'dng']  # acceptable image suffixes
@@ -270,15 +271,27 @@ class LoadStreams:  # multiple IP or RTSP cameras
         self.sources = sources
         for i, s in enumerate(sources):
             # Start the thread to read frames from the video stream
-            print('%g/%g: %s... ' % (i + 1, n, s), end='')
-            cap = cv2.VideoCapture(eval(s) if s.isnumeric() else s)
-            assert cap.isOpened(), 'Failed to open %s' % s
-            w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-            h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-            fps = cap.get(cv2.CAP_PROP_FPS) % 100
-            _, self.imgs[i] = cap.read()  # guarantee first frame
+            
+            DevList = mvsdk.CameraEnumerateDevice()
+            nDev = len(DevList)
+            if nDev < 1:
+                print("No camera was found!")
+            for j, DevInfo in enumerate(DevList):
+                print("{}: {} {}".format(j, DevInfo.GetFriendlyName(), DevInfo.GetPortType()))
+
+            cams = []
+            for j in map(lambda x: int(x), input("Select cameras: ").split()):
+                cam = mvcamera.Camera(DevList[j])
+                if cam.open():
+                    cams.append(cam)
+
+            cap = cams[0]
+
+            frame = cap.grab()
+            w = frame.shape[1]
+            h = frame.shape[0]
+            self.imgs[i] = frame # guarantee first frame
             thread = Thread(target=self.update, args=([i, cap]), daemon=True)
-            print(' success (%gx%g at %.2f FPS).' % (w, h, fps))
             thread.start()
         print('')  # newline
 
@@ -291,12 +304,12 @@ class LoadStreams:  # multiple IP or RTSP cameras
     def update(self, index, cap):
         # Read next stream frame in a daemon thread
         n = 0
-        while cap.isOpened():
+        while cap.open():
             n += 1
             # _, self.imgs[index] = cap.read()
-            cap.grab()
+            frame = cap.grab()
             if n == 4:  # read every 4th frame
-                _, self.imgs[index] = cap.retrieve()
+                self.imgs[index] = frame
                 n = 0
             time.sleep(0.01)  # wait time
 

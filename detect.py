@@ -118,6 +118,7 @@ def detect(save_img=False):
             if view_img:
                 cv2.imshow(str(p), im0)
                 if cv2.waitKey(1) == ord('q'):  # q to quit
+                    cam.close()
                     raise StopIteration
 
             # Save results (image with detections)
