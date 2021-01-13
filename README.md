@@ -18,10 +18,12 @@ old version
 > python detection.py --mode webcam
 
 new version
-> python detect.py --weights best.pt  --source 0 --view-img
+> py detect.py --weights best.pt  --source 0 --view-img
 
 ## 2 Collect frame as the raw dataset, using mindvision camera
-> python grabFrame.py --collection 1 --reponum (the numbe your want) --framenum (the number you want)
+> py grabFrame.py --collection 1 --reponum (the numbe your want) --framenum (the number you want)
+example:
+> py grabFrame.py --collection 1 --reponum 4 --framenum 100
 
 ## 3 Use mindVision camera,just for a look
 > python grabFrame.py --collection 0
@@ -239,6 +241,8 @@ RedContourExtract算法优化进行中。
 尝试用测试形状的方法去做，效果不好。
 
 暂时没有新的优化思路了。
+
+可以试一试用yolo做切割？
 
 
 
