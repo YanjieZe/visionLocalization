@@ -166,17 +166,22 @@ def redContourExtract(img):
     img_origin = img.copy()
     img = cv2.cvtColor(img,cv2.COLOR_BGR2HSV)
     # range of red
-    lower_red = np.array([150, 120, 20])
-    upper_red = np.array([180, 180, 60])
+    lower_red = np.array([150, 60, 20])
+    upper_red = np.array([190, 150, 60])
 
     lower_red2 = np.array([0, 120, 20])
-    upper_red2 = np.array([20, 180, 60])  # thers is two ranges of red
+    upper_red2 = np.array([30, 160, 60])  # thers is two ranges of red
+
+    lower_red3 = np.array([110,30,40])
+    upper_red3 = np.array([180,80,80])
 
     mask_r = cv2.inRange(img, lower_red, upper_red)
 
     mask_r2 = cv2.inRange(img, lower_red2, upper_red2)
 
-    mask = mask_r + mask_r2
+    mask_r3 = cv2.inRange(img,lower_red3,upper_red3)
+
+    mask = mask_r + mask_r2 + mask_r3
     
     kernel = np.ones((3,3))
     img = cv2.dilate(mask,kernel)
@@ -240,14 +245,15 @@ def redContourExtract(img):
         M=cv2.moments(contours[i])
         if M['m00']==0:
                 M['m00']=0.001
-        cx = int(M['m10']/M['m00'])
-        cy = int(M['m01']/M['m00'])
-        if i == idx1:
-            print("the maxArea center point:",cx,cy)
-        img_origin = cv2.circle(img_origin,(cx,cy),1,[255,0,255],5)
+        cx = M['m10']/M['m00']
+        cy = M['m01']/M['m00']
+        # if i == idx1:
+        #     print("the maxArea center point:",cx,cy)
+        img_origin = cv2.circle(img_origin,(int(cx),int(cy)),1,[255,255,0],6)
         center_point = (cx,cy)
+        center_point_int = (int(cx),int(cy))
         center_point_list.append(center_point)
-        img_origin = cv2.putText(img_origin,"(%d,%d)"%(cx,cy),center_point,cv2.FONT_HERSHEY_PLAIN,2,(0,255,255),2)
+        img_origin = cv2.putText(img_origin,"(%d,%d)"%(cx,cy),center_point_int,cv2.FONT_HERSHEY_PLAIN,2,(0,255,255),2)
         img_origin = cv2.drawContours(img_origin,contours,i,[255,0,255],3)
 
     # print("Area Max 4:",area1,area2,area3,area4)
@@ -276,9 +282,10 @@ def apriltagFindCorner(frame):
 '''
 def solvePoint(center_point_list):
     point_num = len(center_point_list)
+    # center point list 中的point顺序不一定，需要判断
     if point_num<4:
         print("Currently can't solve PnP problem!")
-        return 
+        return 0
 
     camera_intrinsic_matrix = np.array(
         [[1557.90406532275,0,0],
@@ -287,38 +294,49 @@ def solvePoint(center_point_list):
     
     # 这个矩阵这样写不知道对不对？
     camera_distortion = np.array(
-        [-0.152787687060218,0.275768296110960,0,0,0]
+        [-0.152787687060218,0.275768296110960,0,0]
     )
 
     '''
-    World
-    右下角方块角点：（0，0，0）
-
-    右上角：（16，0，0）
-
-    左下角：（0，21，0）
-
-    左上角：（16，21，0）
+    World point
     '''
     point_world1 = np.array([0,0,0],dtype=np.float32)
     point_world2 = np.array([16,0,0],dtype=np.float32)
     point_world3 = np.array([0,21,0],dtype=np.float32)
-    point_world4 = np.array([16,21,0],dtype=np.float32)
+    point_world4 = np.array([15,21,0],dtype=np.float32)
 
     if point_num==4:
-       '''
-       这里放一个判断相对位置的算法
-       '''
-       point_world = np.stack([point_world1,point_world2,point_world3,point_world4]) # shape: 4*3
-       point_image = np.stack([center_point_list[0],center_point_list[1],center_point_list[2],center_point_list[3]])
-       # print(point_image, point_world)
-       success, rotation_vector, translation_vector = cv2.solvePnP (point_world,point_image,camera_intrinsic_matrix,camera_distortion,flags=cv2.SOLVEPNP_ITERATIVE)
-       # print("rotation", rotation)
+        print("get four points successfully....")
+        '''
+        判断相对位置的算法
+        '''
+        def extractX(a):
+            return a[0]
+        center_point_list.sort(key=extractX)
+        if center_point_list[0][1] < center_point_list[1][1]:
+           point1 = center_point_list[0]
+           point3 = center_point_list[1]
+        else:
+           point1 = center_point_list[1]
+           point3 = center_point_list[0]
+        
+        if center_point_list[2][1]<center_point_list[3][1]:
+            point2 = center_point_list[2]
+            point4 = center_point_list[3]
+        else:
+            point2 = center_point_list[3]
+            point4 = center_point_list[2]
+        
+        point_image = np.stack([point1,point2,point3,point4])
+        point_world = np.stack([point_world1,point_world2,point_world3,point_world4]) # shape: 4*3
+        # print(point_image, point_world)
+        success, rotation_vector, translation_vector = cv2.solvePnP (point_world,point_image,camera_intrinsic_matrix,camera_distortion,flags=cv2.SOLVEPNP_ITERATIVE)
+        # print("rotation", rotation)
 
-       #这里借用一下公式
-       rotM = cv2.Rodrigues(rotation_vector)[0]
-       position = -np.matrix(rotM).T * np.matrix(translation_vector)
-       return position
+         #这里借用一下公式
+        rotM = cv2.Rodrigues(rotation_vector)[0]
+        position = -np.matrix(rotM).T * np.matrix(translation_vector)
+        return position
 
 
 
@@ -374,8 +392,10 @@ def CameraLoopCornerFinding1():
                     输入frame处，在此对frame做修改
                     '''
                     frame_detection,centerpoint_list = redContourExtract(frame)
-
-                    cv2.imshow("Vision Localization V2.0".format(cam.DevInfo.GetFriendlyName()), frame_detection)
+                    position = solvePoint(center_point_list=centerpoint_list)
+                    if isinstance(position,int)!=1:
+                        frame_detection = cv2.putText(frame_detection,"camera postion:(%d,%d,%d)"%(position[0],position[1],position[2]),(20,20),cv2.FONT_HERSHEY_PLAIN,2,(255,255,0),2)
+                    cv2.imshow("Vision Localization V3.0".format(cam.DevInfo.GetFriendlyName()), frame_detection)
                     current_time = time.time()
                     delta_time = current_time - origin_time
                     origin_time = current_time
@@ -450,7 +470,6 @@ def CameraLoopCornerFinding2():
 
 
 
-
 parser = argparse.ArgumentParser(description='corner point detection')
 
 parser.add_argument('--mode',dest='mode', type=str,required=True,
@@ -477,14 +496,10 @@ if __name__=="__main__":
             cv2.destroyAllWindows()
 
     elif mode == "test":
-
-        
-        a = np.array([1,1],dtype=np.float32)
-        b = np.array([17,1],dtype=np.float32)
-        c = np.array([1,22],dtype=np.float32)
-        d = np.array([17,22],dtype=np.float32)
-        point_list = [a,b,c,d]
-        position = solvePoint(point_list)
-        print(position)
+        img = cv2.imread("example3.png")
+        autoHSVget(img)
+        img1,_ = redContourExtract(img)
+        cv2.imshow("img",img1)
+        cv2.waitKey(0)
     else:
         print("Error:This mode is not available")
