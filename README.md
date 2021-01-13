@@ -180,6 +180,14 @@ RedContourExtract算法优化进行中。
 
 
 
+## 2021.01.13 continuing fixing bugs and pushing forward
+
+首先把昨天solvePnP的bug修好了：**输入的世界坐标点和图像坐标点必须是float类型**
+
+然后用暂时可以求解出位置了。
+
+下一步要做的：写一个相对位置判断算法。
+
 # Ⅲ Bug log
 
 ## 1."bort" (this may appear on MacOS)

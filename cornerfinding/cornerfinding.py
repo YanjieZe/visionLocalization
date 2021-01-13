@@ -276,18 +276,18 @@ def apriltagFindCorner(frame):
 '''
 def solvePoint(center_point_list):
     point_num = len(center_point_list)
-    if point_num<3:
+    if point_num<4:
         print("Currently can't solve PnP problem!")
         return 
 
     camera_intrinsic_matrix = np.array(
         [[1557.90406532275,0,0],
         [0,1543.49983613257,0],
-        [680.204169094410,644.295104426977,1]])
+        [680.204169094410,644.295104426977,1]]).T
     
     # 这个矩阵这样写不知道对不对？
     camera_distortion = np.array(
-        [-0.152787687060218,0.275768296110960,0,0]
+        [-0.152787687060218,0.275768296110960,0,0,0]
     )
 
     '''
@@ -300,10 +300,10 @@ def solvePoint(center_point_list):
 
     左上角：（16，21，0）
     '''
-    point_world1 = np.array([0,0,0])
-    point_world2 = np.array([16,0,0])
-    point_world3 = np.array([0,21,0])
-    point_world4 = np.array([16,21,0])
+    point_world1 = np.array([0,0,0],dtype=np.float32)
+    point_world2 = np.array([16,0,0],dtype=np.float32)
+    point_world3 = np.array([0,21,0],dtype=np.float32)
+    point_world4 = np.array([16,21,0],dtype=np.float32)
 
     if point_num==4:
        '''
@@ -311,8 +311,14 @@ def solvePoint(center_point_list):
        '''
        point_world = np.stack([point_world1,point_world2,point_world3,point_world4]) # shape: 4*3
        point_image = np.stack([center_point_list[0],center_point_list[1],center_point_list[2],center_point_list[3]])
-       rotation, translation = cv2.solvePnP (point_world,point_image,camera_intrinsic_matrix,camera_distortion)
-       print("rotation", rotation)
+       # print(point_image, point_world)
+       success, rotation_vector, translation_vector = cv2.solvePnP (point_world,point_image,camera_intrinsic_matrix,camera_distortion,flags=cv2.SOLVEPNP_ITERATIVE)
+       # print("rotation", rotation)
+
+       #这里借用一下公式
+       rotM = cv2.Rodrigues(rotation_vector)[0]
+       position = -np.matrix(rotM).T * np.matrix(translation_vector)
+       return position
 
 
 
@@ -473,11 +479,12 @@ if __name__=="__main__":
     elif mode == "test":
 
         
-        a = np.array([1,1])
-        b = np.array([17,1])
-        c = np.array([1,22])
-        d = np.array([17,22])
+        a = np.array([1,1],dtype=np.float32)
+        b = np.array([17,1],dtype=np.float32)
+        c = np.array([1,22],dtype=np.float32)
+        d = np.array([17,22],dtype=np.float32)
         point_list = [a,b,c,d]
-        solvePoint(point_list)
+        position = solvePoint(point_list)
+        print(position)
     else:
         print("Error:This mode is not available")
