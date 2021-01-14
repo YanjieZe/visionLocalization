@@ -38,9 +38,9 @@ def detect(weights,imgsz=640,_device=''):
 
     cams = []
     for j in map(lambda x: int(x), input("Select cameras: ").split()):
-            cam = mvcamera.Camera(DevList[j])
-    if cam.open():
-            cams.append(cam)
+        cam = mvcamera.Camera(DevList[j])
+        if cam.open():
+                cams.append(cam)
 
     cap = cams[0]
 
@@ -73,56 +73,75 @@ def detect(weights,imgsz=640,_device=''):
         pred = non_max_suppression(pred, conf_thres, iou_thres, classes, agnostic=agnostic_nms)
         t2 = time_synchronized()
 
-        # # Process detections
-        # for i, det in enumerate(pred):  # detections per image
+        # Process detections
+        for i, det in enumerate(pred):  # detections per image
             
-        #     _, s, im0 = _, '%g: ' % i, im0s[i].copy()
-    
+            _, s, im0 = _, '%g: ' % i, im0s[i].copy()
+
            
-        #     s += '%gx%g ' % img.shape[2:]  # print string
-        #     gn = torch.tensor(im0.shape)[[1, 0, 1, 0]]  # normalization gain whwh
-        #     if len(det):
-        #         # Rescale boxes from img_size to im0 size
-        #         det[:, :4] = scale_coords(img.shape[2:], det[:, :4], im0.shape).round()
+            s += '%gx%g ' % img.shape[2:]  # print string
+            gn = torch.tensor(im0.shape)[[1, 0, 1, 0]]  # normalization gain whwh
+            if len(det):
+                # Rescale boxes from img_size to im0 size
+                det[:, :4] = scale_coords(img.shape[2:], det[:, :4], im0.shape).round()
 
-        #         # Print results
-        #         for c in det[:, -1].unique():
-        #             n = (det[:, -1] == c).sum()  # detections per class
-        #             s += '%g %ss, ' % (n, names[int(c)])  # add to string
+                # Print results
+                for c in det[:, -1].unique():
+                    n = (det[:, -1] == c).sum()  # detections per class
+                    s += '%g %ss, ' % (n, names[int(c)])  # add to string
 
-        #         # Write results
-        #         for *xyxy, conf, cls in reversed(det):
-     
-        #             if view_img:  # Add bbox to image
-        #                 label = '%s %.2f' % (names[int(cls)], conf)
-        #                 plot_one_box(xyxy, im0, label=label, color=colors[int(cls)], line_thickness=3)
+                # Write results
+                for *xyxy, conf, cls in reversed(det):
+                    try:
+                        img_cropped = getCropped(im0,xyxy)
+                        img_contour,center_point_list = redContourExtract(img_cropped)
+                    
+                        position = solvePoint(center_point_list)
+                    except:
+                        continue
+                    if isinstance(img_contour,int):
+                        continue
+                    cv2.imshow("contour extract result:",img_contour)
 
-        #     # Print time (inference + NMS)
-        #     print('%sDone. (%.3fs)' % (s, t2 - t1))
+                    if cv2.waitKey(1) == ord('q'):  # q to quit
+                        cam.close()
+                        cv2.destroyAllWindows()
 
-        #     if view_img:
-        #         cv2.imshow("prediction result", im0)
-        #         if cv2.waitKey(1) == ord('q'):  # q to quit
-        #             cam.close()
-        #             raise StopIteration
+                    if isinstance(position,int)!=1:
+                        cv2.putText(im0,"camera postion:(%d,%d,%d)"%(position[0],position[1],position[2]),(20,20),cv2.FONT_HERSHEY_PLAIN,2,(255,255,0),2)          
+                    
+                    if view_img:  # Add bbox to image
+                        label = '%s %.2f' % (names[int(cls)], conf)
+                        
+                        plot_one_box(xyxy, im0, label=label, color=colors[int(cls)], line_thickness=3)
+
+            # Print time (inference + NMS)
+            print('%sDone. (%.3fs)' % (s, t2 - t1))
+
+            if view_img:
+                cv2.imshow("final result", im0)
+                if cv2.waitKey(1) == ord('q'):  # q to quit
+                    cam.close()
+                    cv2.destroyAllWindows()
+                    raise StopIteration
         
-        '''
-        对detection结果做处理
-        '''
-        frame = img_origin
-        for i,det in enumerate(pred):
-            if det.shape[0]<=0 or det.shape[1]<6 or det[0][4]<=0.001:
-                continue
-            img_cropped = getCropped(img_origin,det)
-            img_contour,centerpoint_list = redContourExtract(img_cropped)
+        # '''
+        # 对detection结果做处理
+        # '''
+        # frame = img_origin
+        # for i,det in enumerate(pred):
+        #     if det.shape[0]<=0 or det.shape[1]<6 or det[0][4]<=0.001:
+        #         continue
+        #     img_cropped = getCropped(img_origin,det)
+        #     img_contour,centerpoint_list = redContourExtract(img_cropped)
 
-            position = solvePoint(center_point_list=centerpoint_list)
-            if isinstance(position,int)!=1:
-                frame = cv2.putText(img_contour,"camera postion:(%d,%d,%d)"%(position[0],position[1],position[2]),(20,20),cv2.FONT_HERSHEY_PLAIN,2,(255,255,0),2)          
-        cv2.imshow("img",frame)    
-        if cv2.waitKey(1) == ord('q'):
-                cap.close()
-                raise StopIteration
+        #     position = solvePoint(center_point_list=centerpoint_list)
+        #     if isinstance(position,int)!=1:
+        #         frame = cv2.putText(img_contour,"camera postion:(%d,%d,%d)"%(position[0],position[1],position[2]),(20,20),cv2.FONT_HERSHEY_PLAIN,2,(255,255,0),2)          
+        # cv2.imshow("img",frame)    
+        # if cv2.waitKey(1) == ord('q'):
+        #         cap.close()
+        #         raise StopIteration
         
 
 if __name__=="__main__":

@@ -5,26 +5,11 @@ import numpy as np
 import argparse
 import time
 
-def getCropped(picture, pred):
+def getCropped(picture, x):
     
-    # label格式：class ，x_center ，y_center ，width， height
-    # 对应：      0       1            2        3       4
-    # predict格式：x_center ，y_center ，width， height，posibility，class
-    # 对应：      0       1            2        3       4       5
-    label = pred[0]
-    width = picture.shape[0]
-    height = picture.shape[1]
-    # 计算要裁剪的四角
-    x0 = width*(label[0] - 0.5*label[2])
-    x1 = int(width*(label[0] - 0.5*label[2]))
-    print("误差：", x0 - x1)# 误差
-    x2 = int(width*(label[0] + 0.5*label[2]))
-    y1 = int(height*(label[1] - 0.5*label[3]))
-    y2 = int(height*(label[1] + 0.5*label[3]))
-    '''
-    因为是像素化的图片，用int做了一个近似，存在一定误差
-    '''
-    img_cropped = picture[x1:x2,y1:y2]
+    c1, c2 = (int(x[0]), int(x[1])), (int(x[2]), int(x[3]))
+    
+    img_cropped = picture[c1[0]:c2[0],c1[1]:c2[1]]
 
     return img_cropped
 
@@ -179,13 +164,15 @@ def redContourExtract(img):
 
     lower_red3 = np.array([110,30,40])
     upper_red3 = np.array([200,100,80])
+    try:
+        mask_r = cv2.inRange(img, lower_red, upper_red)
 
-    mask_r = cv2.inRange(img, lower_red, upper_red)
+        mask_r2 = cv2.inRange(img, lower_red2, upper_red2)
 
-    mask_r2 = cv2.inRange(img, lower_red2, upper_red2)
-
-    mask_r3 = cv2.inRange(img,lower_red3,upper_red3)
-
+        mask_r3 = cv2.inRange(img,lower_red3,upper_red3)
+    except:
+        print("The detection result can't generate Mask!!!!")
+        return 0
     mask = mask_r + mask_r2 + mask_r3
     
     kernel = np.ones((3,3))

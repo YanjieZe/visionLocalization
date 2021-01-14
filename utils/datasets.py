@@ -290,11 +290,11 @@ class LoadStreams:  # multiple IP or RTSP cameras
     def update(self, index):
         # Read next stream frame in a daemon thread
         n = 0
-        while self.camera.open():
+        while 1:
             n += 1
             # _, self.imgs[index] = cap.read()
             frame = self.camera.grab()
-            if n == 4:  # read every 4th frame
+            if n == 2:  # read every 4th frame
                 self.imgs[index] = frame
                 n = 0
             time.sleep(0.01)  # wait time
