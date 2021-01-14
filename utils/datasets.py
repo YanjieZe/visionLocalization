@@ -256,9 +256,10 @@ class LoadWebcam:  # for inference
 
 
 class LoadStreams:  # multiple IP or RTSP cameras
-    def __init__(self, sources='streams.txt', img_size=640):
+    def __init__(self, sources='streams.txt', img_size=640,camera=None):
         self.mode = 'images'
         self.img_size = img_size
+        self.camera = camera
 
         if os.path.isfile(sources):
             with open(sources, 'r') as f:
@@ -272,26 +273,11 @@ class LoadStreams:  # multiple IP or RTSP cameras
         for i, s in enumerate(sources):
             # Start the thread to read frames from the video stream
             
-            DevList = mvsdk.CameraEnumerateDevice()
-            nDev = len(DevList)
-            if nDev < 1:
-                print("No camera was found!")
-            for j, DevInfo in enumerate(DevList):
-                print("{}: {} {}".format(j, DevInfo.GetFriendlyName(), DevInfo.GetPortType()))
-
-            cams = []
-            for j in map(lambda x: int(x), input("Select cameras: ").split()):
-                cam = mvcamera.Camera(DevList[j])
-                if cam.open():
-                    cams.append(cam)
-
-            cap = cams[0]
-
-            frame = cap.grab()
+            frame = self.camera.grab()
             w = frame.shape[1]
             h = frame.shape[0]
             self.imgs[i] = frame # guarantee first frame
-            thread = Thread(target=self.update, args=([i, cap]), daemon=True)
+            thread = Thread(target=self.update, args=([i]), daemon=True)
             thread.start()
         print('')  # newline
 
@@ -301,13 +287,13 @@ class LoadStreams:  # multiple IP or RTSP cameras
         if not self.rect:
             print('WARNING: Different stream shapes detected. For optimal performance supply similarly-shaped streams.')
 
-    def update(self, index, cap):
+    def update(self, index):
         # Read next stream frame in a daemon thread
         n = 0
-        while cap.open():
+        while self.camera.open():
             n += 1
             # _, self.imgs[index] = cap.read()
-            frame = cap.grab()
+            frame = self.camera.grab()
             if n == 4:  # read every 4th frame
                 self.imgs[index] = frame
                 n = 0

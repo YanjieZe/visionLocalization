@@ -13,11 +13,7 @@ YanjieZe(the Last Refugee)
 
 # Ⅰ Use method
 
-## 1 use web cam for detection
-old version
-> python detection.py --mode webcam
-
-new version
+## 1 use mindvision cam for detection
 > py detect.py --weights best.pt  --source 0 --view-img
 
 ## 2 Collect frame as the raw dataset, using mindvision camera
@@ -251,6 +247,16 @@ RedContourExtract算法优化进行中。
 尝试1：将dataset.py的loadstream对象修改
 
 尝试成功，但是有一些问题。还是考虑从detect函数里改。
+
+
+
+## 2021.01.14 reconstructing YOLOV5 and modifying
+
+把yolov5的代码做了一些修改，放进了自己的函数。
+
+
+
+
 
 # Ⅲ Bug log
 

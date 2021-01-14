@@ -13,6 +13,8 @@ from utils.general import check_img_size, non_max_suppression, apply_classifier,
     strip_optimizer, set_logging, increment_path
 from utils.plots import plot_one_box
 from utils.torch_utils import select_device, load_classifier, time_synchronized
+import mvsdk
+import mvcamera
 
 
 def detect(save_img=False):
@@ -46,7 +48,22 @@ def detect(save_img=False):
     if webcam:
         view_img = True
         cudnn.benchmark = True  # set True to speed up constant image size inference
-        dataset = LoadStreams(source, img_size=imgsz)
+        DevList = mvsdk.CameraEnumerateDevice()
+        nDev = len(DevList)
+
+        if nDev < 1:
+            print("No camera was found!")
+        for j, DevInfo in enumerate(DevList):
+            print("{}: {} {}".format(j, DevInfo.GetFriendlyName(), DevInfo.GetPortType()))
+
+        cams = []
+        for j in map(lambda x: int(x), input("Select cameras: ").split()):
+            cam = mvcamera.Camera(DevList[j])
+        if cam.open():
+            cams.append(cam)
+
+        cap = cams[0]
+        dataset = LoadStreams(source, img_size=imgsz,camera=cap)
     else:
         save_img = True
         dataset = LoadImages(source, img_size=imgsz)
@@ -70,7 +87,7 @@ def detect(save_img=False):
         # Inference
         t1 = time_synchronized()
         pred = model(img, augment=opt.augment)[0]
-
+        
         # Apply NMS
         pred = non_max_suppression(pred, opt.conf_thres, opt.iou_thres, classes=opt.classes, agnostic=opt.agnostic_nms)
         t2 = time_synchronized()
@@ -79,6 +96,7 @@ def detect(save_img=False):
         if classify:
             pred = apply_classifier(pred, modelc, img, im0s)
 
+        print("detections:",pred)
         # Process detections
         for i, det in enumerate(pred):  # detections per image
             if webcam:  # batch_size >= 1
@@ -147,8 +165,8 @@ def detect(save_img=False):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--weights', nargs='+', type=str, default='yolov5s.pt', help='model.pt path(s)')
-    parser.add_argument('--source', type=str, default='data/images', help='source')  # file/folder, 0 for webcam
+    parser.add_argument('--weights', nargs='+', type=str, default='best.pt', help='model.pt path(s)')
+    parser.add_argument('--source', type=str, default='0', help='source')  # file/folder, 0 for webcam
     parser.add_argument('--img-size', type=int, default=640, help='inference size (pixels)')
     parser.add_argument('--conf-thres', type=float, default=0.25, help='object confidence threshold')
     parser.add_argument('--iou-thres', type=float, default=0.45, help='IOU threshold for NMS')
