@@ -4,21 +4,23 @@ import mvcamera
 import numpy as np
 import argparse
 import time
-from apriltag import Apriltag
 
-def getCropped(picture, label):
+def getCropped(picture, pred):
     
     # label格式：class ，x_center ，y_center ，width， height
     # 对应：      0       1            2        3       4
+    # predict格式：x_center ，y_center ，width， height，posibility，class
+    # 对应：      0       1            2        3       4       5
+    label = pred[0]
     width = picture.shape[0]
     height = picture.shape[1]
     # 计算要裁剪的四角
-    x0 = width*(label[1] - 0.5*label[3])
-    x1 = int(width*(label[1] - 0.5*label[3]))
+    x0 = width*(label[0] - 0.5*label[2])
+    x1 = int(width*(label[0] - 0.5*label[2]))
     print("误差：", x0 - x1)# 误差
-    x2 = int(width*(label[1] + 0.5*label[3]))
-    y1 = int(height*(label[2] - 0.5*label[4]))
-    y2 = int(height*(label[2] + 0.5*label[4]))
+    x2 = int(width*(label[0] + 0.5*label[2]))
+    y1 = int(height*(label[1] - 0.5*label[3]))
+    y2 = int(height*(label[1] + 0.5*label[3]))
     '''
     因为是像素化的图片，用int做了一个近似，存在一定误差
     '''
@@ -162,6 +164,9 @@ def findCornerByCenter(img):
 根据颜色提取轮廓的角点检测算法，2
 '''
 def redContourExtract(img):
+    '''
+    返回 img,center_point_list
+    '''
     time_start = time.time()
     img_origin = img.copy()
     img = cv2.cvtColor(img,cv2.COLOR_BGR2HSV)
@@ -496,13 +501,14 @@ def CameraLoopCornerFinding2():
 
 
 
-parser = argparse.ArgumentParser(description='corner point detection')
 
-parser.add_argument('--mode',dest='mode', type=str,required=True,
-                    help='choose the mode, camera or img or test')
-args = parser.parse_args()
 
 if __name__=="__main__":
+    parser = argparse.ArgumentParser(description='corner point detection')
+
+    parser.add_argument('--mode',dest='mode', type=str,required=True,
+                    help='choose the mode, camera or img or test')
+    args = parser.parse_args()
     mode = args.mode
 
     if mode == "img":
