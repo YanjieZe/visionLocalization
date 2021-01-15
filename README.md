@@ -256,7 +256,7 @@ RedContourExtract算法优化进行中。
 
 **detection.py**
 
-一个上午将代码框架写好了，但是存在很多bug，目前正在慢慢调试。
+将代码框架写好了，但是存在很多bug，目前正在慢慢调试。
 
 
 
@@ -268,7 +268,13 @@ RedContourExtract算法优化进行中。
 
 
 
+## 2021.01.15 continuing modifying
 
+继续改昨天的bug。
+
+今天又改完了几个bug，展示效果比昨天好一点。
+
+目前很需要**数据集。**
 
 # Ⅲ Bug log
 
