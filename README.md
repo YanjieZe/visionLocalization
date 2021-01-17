@@ -1,6 +1,18 @@
 # CornerPointDetection
 YanjieZe(the Last Refugee)
 
+
+
+# 项目说明
+
+使用two-stage algorithm识别tag进而标定相机位置。
+
+首先，使用yolov5进行目标检测，获得bounding box。
+
+然后，对bounding box区域单独处理，使用轮廓提取与角点检测的算法获得四个角点的位置，进而求解PnP问题获得相机位置。
+
+
+
 # 目录
 
 [Ⅰ Use method](https://github.com/YanjieZe/visionLocalization#%E2%85%B0-use-method)
